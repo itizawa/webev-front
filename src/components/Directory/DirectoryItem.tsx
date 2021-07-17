@@ -11,7 +11,7 @@ import { IconButton } from '~/components/Icons/IconButton';
 import { useLocale } from '~/hooks/useLocale';
 import { Directory } from '~/domains/Directory';
 import { BootstrapBreakpoints, BootstrapColor, BootstrapIcon } from '~/interfaces/variables';
-import { useAllDirectories, useDirectoryChildren } from '~/stores/directory';
+import { useAllDirectories, useAllParentDirectories, useDirectoryChildrens } from '~/stores/directory';
 
 type Props = {
   directory?: Directory;
@@ -21,8 +21,15 @@ type Props = {
 
 export const DirectoryItem: VFC<Props> = ({ directory, onClickDirectory, activeDirectoryId }) => {
   const { t } = useLocale();
+  const { data: allParentDirectories = [], mutate: mutateAllParentDirectories } = useAllParentDirectories();
 
-  const { data: childrenDirectortTrees, mutate: mutateChildrenDirectortTrees } = useDirectoryChildren(directory?._id);
+  const allParentDirectoryIds = [];
+  for (const value of Object.values(allParentDirectories)) {
+    allParentDirectoryIds.push(value._id);
+  }
+
+  // TODO: need to set args allParentDirectories' ids
+  const { data: childrenDirectortTrees, mutate: mutateChildrenDirectortTrees } = useDirectoryChildrens(allParentDirectoryIds);
   const { mutate: mutateAllDirectories } = useAllDirectories();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +65,7 @@ export const DirectoryItem: VFC<Props> = ({ directory, onClickDirectory, activeD
       toastSuccess(t.toastr_save_directory);
       setName('');
       mutateChildrenDirectortTrees();
+      mutateAllParentDirectories();
       mutateAllDirectories();
       setIsCreatingNewDirectory(false);
     } catch (err) {
@@ -139,7 +147,7 @@ export const DirectoryItem: VFC<Props> = ({ directory, onClickDirectory, activeD
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="form-control bg-white" placeholder="...name" autoFocus />
             </form>
           )}
-          {childrenDirectortTrees?.map((childrenDirectortTree) => {
+          {/* {childrenDirectortTrees?.map((childrenDirectortTree) => {
             return (
               <DirectoryItem
                 key={childrenDirectortTree._id}
@@ -149,7 +157,7 @@ export const DirectoryItem: VFC<Props> = ({ directory, onClickDirectory, activeD
               />
             );
           })}
-          {childrenDirectortTrees?.length === 0 && <div className="ps-3 my-1">No Directory</div>}
+          {childrenDirectortTrees?.length === 0 && <div className="ps-3 my-1">No Directory</div>} */}
         </div>
       </Collapse>
     </>
